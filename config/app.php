@@ -177,6 +177,11 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /**
+        * API Skeleton Service Providers
+        */
+        App\Providers\ApiRoutingServiceProvider::class,
+
     ],
 
     /*
