@@ -19,13 +19,13 @@ class ApiCheckJwtToken
     public function handle(Request $request, Closure $next)
     {
 
-        if(!JWTAuth::parseToken()){  
+        if(!$user = JWTAuth::parseToken()->toUser()){  
             
             return response()->json(array('error'=>'Please set valid JWT token in the bearer auth'));
         }  
 
         //$user = JWTAuth::parseToken()->toUser();
-        
+
         return $next($request);
     }
 }

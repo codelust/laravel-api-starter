@@ -17,6 +17,13 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+    public function __construct()
+    {
+        //$this->middleware(['auth.check.app.id', 'auth.check.jwt.token'], ['except' => ['login', 'logout']]);
+    }
+
     public function login(Request $request)
     {
         //
@@ -41,7 +48,7 @@ class AuthController extends Controller
 
 	        // all good so return the token
 
-	        $user = User::where('email', $data['email']) -> first();
+	        $user = User::where('email', $data['email'])->first();
 
 	        $user->token = $token;
 
@@ -52,6 +59,41 @@ class AuthController extends Controller
         } else {
             //TODO Handle your error
             dd($validator->errors()->all());
+        }
+    }
+
+    /**
+     * Login a user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function logout(Request $request)
+    {
+        //
+
+    	dd(JWTAuth::parseToken());
+
+    	if($user = JWTAuth::parseToken()->toUser())
+    		{
+
+
+    			//dd($user);
+
+    			$token = JWTAuth::getToken();
+
+
+					if ($token) {
+					    
+					    if (JWTAuth::setToken($token)->invalidate()) {
+
+					    	return response()->json(['message' => 'user logged out'], 200);
+					    }
+					}	
+    		}
+
+         else {
+            //TODO Handle your error
+            //dd($validator->errors()->all());
         }
     }
 }

@@ -20,7 +20,8 @@ class ApiUserController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth.check.app.id', 'auth.check.jwt.token'], ['except' => []]);
+        //need to find a way to check that this can be selectively applied. For instance, store may need app ID, but it does not bearer.
+        $this->middleware(['auth.check.app.id', 'auth.check.jwt.token'], ['except' => ['store']]);
     }
     public function index()
     {
