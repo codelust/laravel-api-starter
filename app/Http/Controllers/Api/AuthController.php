@@ -69,31 +69,50 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        //
+        
 
-    	dd(JWTAuth::parseToken());
+    	//check if token exists. exit without error if it does not.
 
-    	if($user = JWTAuth::parseToken()->toUser())
-    		{
+    	$token = JWTAuth::getToken();
 
+    	if (!$token) {
+    	
+    		return response()->json(['message' => 'user logged out'], 200);
+    	
+    	} else {
 
-    			//dd($user);
+    		try {
 
-    			$token = JWTAuth::getToken();
+    			$user = JWTAuth::parseToken()->toUser();
+    			
+    		} 
 
+    		catch (JWTException $e) {
 
-					if ($token) {
-					    
-					    if (JWTAuth::setToken($token)->invalidate()) {
+    			//return response()->json(['invalid_token_error'], $e->getStatusCode());
+    			return response()->json(['message' => 'user logged out'], 200);
 
-					    	return response()->json(['message' => 'user logged out'], 200);
-					    }
-					}	
-    		}
+			} catch (TokenExpiredException $e) {
 
-         else {
-            //TODO Handle your error
-            //dd($validator->errors()->all());
-        }
+				//return response()->json(['token_expired'], $e->getStatusCode());
+				return response()->json(['message' => 'user logged out'], 200);
+
+			}
+
+			catch (TokenBlackListedException $e) {
+
+				//return response()->json(['token_black_listed'], $e->getStatusCode());
+				return response()->json(['message' => 'user logged out'], 200);
+
+			}
+				
+			JWTAuth::setToken($token)->invalidate();
+
+			return response()->json(['message' => 'user logged out'], 200);
+			
+
+    	}
+
+    	
     }
 }

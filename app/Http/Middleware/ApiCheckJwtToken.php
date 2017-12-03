@@ -19,12 +19,38 @@ class ApiCheckJwtToken
     public function handle(Request $request, Closure $next)
     {
 
-        if(!$user = JWTAuth::parseToken()->toUser()){  
-            
-            return response()->json(array('error'=>'Please set valid JWT token in the bearer auth'));
-        }  
+        $token = JWTAuth::getToken();
 
-        //$user = JWTAuth::parseToken()->toUser();
+        if (!$token) {
+        
+            return response()->json(array('error'=>'Please set valid JWT token in the bearer auth'));
+        
+        } else {
+
+            try {
+
+                $user = JWTAuth::parseToken()->toUser();
+                
+            } 
+
+            catch (JWTException $e) {
+
+                return response()->json(array('error'=>'Invalid token'), 401);
+
+            } catch (TokenExpiredException $e) {
+
+                return response()->json(array('error'=>'Token has expired. Please login again'), 401);
+
+            }
+
+            catch (TokenBlackListedException $e) {
+
+                return response()->json(array('error'=>'Token has expired (1). Please login again'), 401);
+
+            }
+            
+
+        }
 
         return $next($request);
     }
