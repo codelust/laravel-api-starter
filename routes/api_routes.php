@@ -22,6 +22,8 @@ $api->version('v1', function ($api) {
 
 		//reset password when not logged in | send the password reset email to user with the link to the reset page from laravel scaffolding
 
+		$api->post('forgot_password', 'App\Http\Controllers\Api\AuthController@fogotPassword');
+
      });
 
 });

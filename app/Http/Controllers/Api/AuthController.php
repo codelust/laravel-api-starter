@@ -9,20 +9,23 @@ use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\User;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
-    /**
-     * Login a user.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
 
 
     public function __construct()
     {
         //$this->middleware(['auth.check.app.id', 'auth.check.jwt.token'], ['except' => ['login', 'logout']]);
     }
+
+    /**
+     * Login a user.
+     *
+     * @return \Illuminate\Http\Response
+     */
 
     public function login(Request $request)
     {
@@ -112,7 +115,79 @@ class AuthController extends Controller
 			
 
     	}
-
     	
     }
+
+    /**
+     * Trigger the forgot password flow
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function fogotPassword(Request $request)
+    {
+
+    	$data = json_decode($request->getContent(), true);
+
+        $rules = array('email' => 'required|string|email|max:255|exists:users');
+
+        $validator = Validator::make($data, $rules);
+        
+        if ($validator->passes()) {
+
+        	// We will send the password reset link to this user. Once we have attempted
+	        // to send the link, we will examine the response then see the message we
+	        // need to show to the user. Finally, we'll send out a proper response.
+	        $response = $this->broker()->sendResetLink(
+	            $request->only('email')
+	        );
+
+        	$response == Password::RESET_LINK_SENT
+                    ? $this->sendResetLinkResponse($response)
+                    : $this->sendResetLinkFailedResponse($request, $response);
+
+             return response()->json(['message' => 'Sent reset email to the email'], 200);
+
+        } else {
+
+        	return response()->json(['error' => 'invalid email'], 404);
+        }
+    }
+
+    /**
+     * Get the response for a successful password reset link.
+     *
+     * @param  string  $response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    protected function sendResetLinkResponse($response)
+    {
+        //return back()->with('status', trans($response));
+        return response()->json(['message' => 'Sent reset email to the email'], 200);
+    }
+
+    /**
+     * Get the response for a successful password reset link.
+     *
+     * @param  string  $response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    protected function sendResetLinkFailedResponse($response)
+    {
+        //return back()->with('status', trans($response));
+        return response()->json(['error' => 'Could not send password reset email'], 200);
+    }
+
+
+    /**
+     * Get the broker to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     */
+    public function broker()
+    {
+        return Password::broker();
+    }
+
+
 }
